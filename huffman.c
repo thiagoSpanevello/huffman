@@ -11,44 +11,42 @@ typedef struct node
     struct node *left;
 } node;
 
-node* makeNode(char character, int frequency){
-    node* newNode = (node*)malloc(sizeof(node));
-    newNode->character = character;
-    newNode->frequency = frequency;
-    newNode->left = NULL;
-    newNode->right = NULL;
+node makeNode(char character, int frequency){
+    node newNode;
+    newNode.character = character;
+    newNode.frequency = frequency;
+    newNode.left = NULL;
+    newNode.right = NULL;
     return newNode;
 }
 
-void bubbleSort(node* array[]){
-    for (int i = 0; i < SIZE-1; i++)
+void bubbleSort(node* array, int size){
+    for (int i = 0; i < size-1; i++)
     {
-        for (int j = 0; j < SIZE-i-1; i++)
+        for (int j = 0; j < size-i-1; j++)
         {
-            if (array[j]->frequency > array[j+1]->frequency)
+            if (array[j].frequency > array[j+1].frequency)
             {
-                node* aux = (node*)malloc(sizeof(node));
-                aux = array[j];
+                node aux = array[j];
                 array[j] = array[j+1];
                 array[j+1] = aux;
             }
         }
-    }
-    // for (int i = 1; i < SIZE; i++)
-    // {
-    //     for (int j = 0; j < SIZE-1; i++)
-    //     {
-    //         if (array[j]->frequency == array[j+1]->frequency && array[j]->character > array[j+1]->character)
-    //         {
-    //             node* aux = (node*)malloc(sizeof(node));
-    //             aux = array[j];
-    //             array[j] = array[j+1];
-    //             array[j+1] = aux;
-    //         }
+    }  
+    for (int i = 1; i < size; i++)
+    {
+        for (int j = 0; j < size-1; j++)
+        {
+            if (array[j].frequency == array[j+1].frequency && array[j].character > array[j+1].character)
+            {
+                node aux = array[j];
+                array[j] = array[j+1];
+                array[j+1] = aux;
+            }
             
-    //     }
+        }
         
-    // }
+    }
     
 }
 
@@ -64,6 +62,7 @@ int main()
     char c = fgetc(amostra);
     int flag = 0;
     int j = 0;
+    int numCharacters = 0;
     while (!feof(amostra))
     {
         flag = 0;
@@ -81,12 +80,13 @@ int main()
             c = fgetc(amostra);
             continue;
         }
+        numCharacters++;
         characters[j] = c;
         frequencies[j]++;
         j++;
         c = fgetc(amostra);
     }
-    node* arrayNodes[j];
+    node arrayNodes[numCharacters];
     for (int i = 0; i < j; i++)
     {
         // printf("caractere: %c, frequencia: %d\n", characters[i], frequencies[i]);
@@ -94,14 +94,13 @@ int main()
     }
     for (int i = 0; i < j; i++) 
     {
-        printf("caractere: %c, frequencia: %d\n", arrayNodes[i]->character, arrayNodes[i]->frequency);
+        printf("caractere: %c, frequencia: %d\n", arrayNodes[i].character, arrayNodes[i].frequency);
     }
-    
-    bubbleSort(arrayNodes);
+    bubbleSort(arrayNodes, numCharacters);
     printf("ORDENADO\n");
     for (int i = 0; i < j; i++) 
     {
-        printf("caractere: %c, frequencia: %d\n", arrayNodes[i]->character, arrayNodes[i]->frequency);
+        printf("caractere: %c, frequencia: %d\n", arrayNodes[i].character, arrayNodes[i].frequency);
     }
     
     return 0;
