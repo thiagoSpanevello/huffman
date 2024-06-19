@@ -11,23 +11,24 @@ typedef struct node
     struct node *left;
 } node;
 
-node makeNode(char character, int frequency){
-    node newNode;
-    newNode.character = character;
-    newNode.frequency = frequency;
-    newNode.left = NULL;
-    newNode.right = NULL;
+node* makeNode(char character, int frequency) {
+    node* newNode = (node*)malloc(sizeof(node));
+    newNode->character = character;
+    newNode->frequency = frequency;
+    newNode->left = NULL;
+    newNode->right = NULL;
     return newNode;
 }
 
-void bubbleSort(node* array, int size){
-    for (int i = 0; i < size-1; i++)
+
+void bubbleSort(node** array, int size) {
+     for (int i = 0; i < size-1; i++)
     {
         for (int j = 0; j < size-i-1; j++)
         {
-            if (array[j].frequency > array[j+1].frequency)
+            if (array[j]->frequency > array[j+1]->frequency)
             {
-                node aux = array[j];
+                node* aux = array[j];
                 array[j] = array[j+1];
                 array[j+1] = aux;
             }
@@ -37,18 +38,38 @@ void bubbleSort(node* array, int size){
     {
         for (int j = 0; j < size-1; j++)
         {
-            if (array[j].frequency == array[j+1].frequency && array[j].character > array[j+1].character)
+            if (array[j]->frequency == array[j+1]->frequency && array[j]->character > array[j+1]->character)
             {
-                node aux = array[j];
+                node* aux = array[j];
                 array[j] = array[j+1];
                 array[j+1] = aux;
-            }
-            
+            } 
         }
-        
     }
-    
 }
+
+
+node* makeHuffman(node** array, int size) {
+    while (size > 1) {
+        bubbleSort(array, size);
+
+        node* left = array[0];
+        node* right = array[1];
+
+        node* newNode = makeNode('\0', left->frequency + right->frequency);
+        newNode->left = left;
+        newNode->right = right;
+
+        for (int i = 2; i < size; i++) {
+            array[i - 2] = array[i];
+        }
+        array[size - 2] = newNode;
+        size--;
+    }
+    return array[0];
+}
+
+
 
 int main()
 {
@@ -86,23 +107,21 @@ int main()
         j++;
         c = fgetc(amostra);
     }
-    node arrayNodes[numCharacters];
+    node* arrayNodes[numCharacters];
     for (int i = 0; i < j; i++)
     {
         // printf("caractere: %c, frequencia: %d\n", characters[i], frequencies[i]);
         arrayNodes[i] = makeNode(characters[i], frequencies[i]);
     }
-    for (int i = 0; i < j; i++) 
-    {
-        printf("caractere: %c, frequencia: %d\n", arrayNodes[i].character, arrayNodes[i].frequency);
-    }
     bubbleSort(arrayNodes, numCharacters);
-    printf("ORDENADO\n");
-    for (int i = 0; i < j; i++) 
-    {
-        printf("caractere: %c, frequencia: %d\n", arrayNodes[i].character, arrayNodes[i].frequency);
-    }
     
-    return 0;
+    for (int i = 0; i < j; i++)
+    {
+        printf("caractere: %c, frequencia: %d\n", arrayNodes[i]->character, arrayNodes[i]->frequency);
+    }
+    // node* root = makeHuffman(arrayNodes, numCharacters);
+    // printf("",root);
+
 }
+
 
