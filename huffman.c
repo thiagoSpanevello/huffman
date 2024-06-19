@@ -11,6 +11,12 @@ typedef struct node
     struct node *left;
 } Node;
 
+typedef struct codedChar
+{
+    char character;
+    char *codification;
+} CodedChar;
+
 Node *makeNode(char character, int frequency)
 {
     Node *newNode = (Node *)malloc(sizeof(Node));
@@ -76,28 +82,29 @@ Node *makeHuffman(Node **array, int size)
     return array[0];
 }
 
-void buscaLetra(Node *node, char c, char **codification, int i)
-{
-    if (node->right)
-    {
-        // add 1 na codificação
-        codification[i] = '1';
-        i++;
-        return buscaLetra(node->right, c, codification, i);
+
+void findChar(Node *node, char c, char *codification,  int i, char *result) {
+    if (node == NULL) {
+        return;
     }
-    else if (node->left)
-    {
-        // add 0 na codificação
+    if (node->character == c) {
+        codification[i] = '\0';
+        strcpy(result, codification);
+        return;
+    }
+    if (node->left) {
         codification[i] = '0';
-        i++;
-        return buscaLetra(node->left, c, codification, i);
+        findChar(node->left, c, codification, i + 1, result);
+    }
+    if (node->right) {
+        codification[i] = '1';
+        findChar(node->right, c, codification, i + 1, result);
     }
 }
-
 int main()
 {
-    FILE *amostra = fopen("amostra.txt", "r");
-    if (amostra == NULL)
+    FILE *sample = fopen("amostra.txt", "r");
+    if (sample == NULL)
     {
         exit(1);
     }
@@ -105,10 +112,10 @@ int main()
     char characters[SIZE] = {0}, *codification[SIZE] = {0};
     int frequencies[SIZE] = {0};
 
-    char c = fgetc(amostra);
+    char c = fgetc(sample);
     int flag = 0, uniqueCharacters = 0, numCharacters = 0;
 
-    while (!feof(amostra))
+    while (!feof(sample))
     {
         flag = 0;
         for (int i = 0; i < uniqueCharacters; i++)
@@ -122,14 +129,14 @@ int main()
         }
         if (flag == 1)
         {
-            c = fgetc(amostra);
+            c = fgetc(sample);
             continue;
         }
         numCharacters++;
         characters[uniqueCharacters] = c;
         frequencies[uniqueCharacters]++;
         uniqueCharacters++;
-        c = fgetc(amostra);
+        c = fgetc(sample);
     }
     Node *arrayNodes[numCharacters];
 
@@ -146,15 +153,58 @@ int main()
     Node *root = makeHuffman(arrayNodes, numCharacters);
     // printf("%c", root->right->right->right->character);
 
-    rewind(amostra); // Volta o leitor da pasta ao seu início.
-    c = fgetc(amostra);
+    rewind(sample); // Volta o leitor da pasta ao seu início.
+    c = fgetc(sample);
+    char result[SIZE];
+    char encodedText[SIZE * 8] = {0};
 
+    for (int i = 0; i < uniqueCharacters; i++) {
+        findChar(root, characters[i], codification, 0, result);
+    }
+    CodedChar codedCharList[uniqueCharacters];
+    for (int i = 0; i < uniqueCharacters; i++) {
+        codedCharList[i].character = characters[i];
+        findChar(root, codedCharList[i].character, codification, 0, result);
+        codedCharList[i].codification = strdup(result);
+        printf("Caractere '%c': %s\n", characters[i], codedCharList[i].codification);
+    }
     // Percorre toda a pasta novamente, até encontrar uma quebra de linha.
-    while (!feof(amostra))
+    while (!feof(sample))
     {
-        buscaLetra(root, c, codification, 0);
-        c = fgetc(amostra);
+        findChar(root, c, codification, 0, result);        
+        strcat(encodedText, result);
+        c = fgetc(sample);
     }
 
-    printf("%s", codification);
+    fclose(sample);
+    FILE *coded = fopen("codificado.txt", "w");
+    fprintf(coded, encodedText);
+    fclose(coded);
+    coded = fopen("codificado.txt", "r");
+    char string[SIZE] = {0};
+    while (!feof(coded)){
+        c = fgetc(coded);
+        char temp[2] = {c, '\0'};
+        strcat(string, temp);
+    }
+    fclose(coded);
+    FILE *decoded = fopen("decodificado.txt", "w+");
+    char comparation[SIZE] = {0};
+    for (int i = 0; i < strlen(string)-1; i++)
+    {
+        char aux[2] = {string[i], '\0'};
+        strcat(comparation, aux);
+            for (int j = 0; j < uniqueCharacters; j++)
+            {
+                if (strcmp(codedCharList[j].codification, comparation) == 0)
+                {
+                    fputc(codedCharList[j].character, decoded);
+                    strcpy(comparation, "");
+                }
+                
+            }
+            
+    }
+           
+    
 }
